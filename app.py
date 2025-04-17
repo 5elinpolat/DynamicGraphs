@@ -3,7 +3,7 @@ import os
 from utils import detect_chart_type, image_to_video, matplotlib_to_video, add_voice_over, combine_video_audio
 import matplotlib.pyplot as plt
 import pickle
-from io import BytesIO
+from io import BytesIO #denemeSatiri
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
