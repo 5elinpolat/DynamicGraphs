@@ -55,27 +55,35 @@ def image_to_video(image_path, output_path='output_video.mp4', frame_rate=30, du
     except Exception as e:
         raise RuntimeError(f"Video oluşturma hatası: {e}")
 
-def matplotlib_to_video(fig, output_path='output_video.mp4', frame_rate=30, duration=5, codec='mp4v'):
-    """Matplotlib nesnesini videoya çevirir."""
+def matplotlib_to_video(fig, video_path, frame_rate, duration, codec='mp4v'):
     try:
-        fig.canvas.draw()
-        frame = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-        frame = frame.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        height, width, layers = frame.shape
+        print("matplotlib_to_video başladı")
+        # Figure boyutlarını al
+        fig_width, fig_height = fig.canvas.get_width_height()
+        print(f"Figure boyutları: {fig_width}x{fig_height}")
+
+        # Video yazıcıyı başlat
         fourcc = cv2.VideoWriter_fourcc(*codec)
-        video_writer = cv2.VideoWriter(output_path, fourcc, frame_rate, (width, height))
-        if not video_writer.isOpened():
-            raise ValueError("Video yazıcısı açılamadı!")
-        total_frames = frame_rate * duration
-        for _ in range(total_frames):
-            video_writer.write(frame)
-        video_writer.release()
-        plt.close(fig)
-        return output_path
+        out = cv2.VideoWriter(video_path, fourcc, frame_rate, (fig_width, fig_height))
+        if not out.isOpened():
+            raise Exception("Video yazıcı açılamadı")
+
+        # Her frame için
+        for _ in range(int(frame_rate * duration)):
+            print("Frame oluşturuluyor...")
+            fig.canvas.draw()
+            # RGBA verisini al ve RGB’ye dönüştür
+            frame = np.asarray(fig.canvas.buffer_rgba())[:, :, :3]  # Sadece RGB kanalları
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            out.write(frame)
+
+        print("Video yazıcı kapatılıyor...")
+        out.release()
+        print(f"Video oluşturuldu: {video_path}")
+        return video_path
     except Exception as e:
-        plt.close(fig)
-        raise RuntimeError(f"Matplotlib video hatası: {e}")
+        print(f"matplotlib_to_video hatası: {str(e)}")
+        raise Exception(f"Matplotlib video hatası: {str(e)}")
 
 def add_voice_over(text, output_path='voice_over.mp3'):
     """Metni sese çevirir."""

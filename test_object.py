@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')  # GUI olmayan backend
 import matplotlib.pyplot as plt
 import requests
 import pickle
